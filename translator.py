@@ -7,12 +7,11 @@ from isa import Opcode, Expression, Data, write_code, write_data
 def clear_line(line: str) -> str:
     return line.split(";")[0].strip()
 
-
 def value_to_number(value: str) -> int:
+    """string hex or int to int"""
     if value.startswith("0x"):
         return int(value, 16)
     return int(value)
-
 
 def translate(src: str):
     lines = src.splitlines()
@@ -20,36 +19,38 @@ def translate(src: str):
     data = []
     labels = {}
     position = 0
+    src_line = 0
 
     for line in lines:
+        src_line += 1
         line = clear_line(line)
-        if not line:
+        if not line: # empty line
             continue
 
-        splitted = shlex.split(line, posix=False)
+        splitted = shlex.split(line, posix=False) # split but ignore quotes
 
-        if splitted == ["SECTION", ".text"] or splitted == ["SECTION", ".data"]:
+        if splitted == ["SECTION", ".text"] or splitted == ["SECTION", ".data"]: # new section - reset position (harvard)
             position = 0
             continue
 
-        if line.endswith(":"):
+        if line.endswith(":"): # label
             label = line[:-1]
             assert label not in labels, f"Label {label} already defined"
             labels[label] = position
             continue
 
-        if splitted[0].endswith(":") and splitted[1] == "db":
+        if splitted[0].endswith(":") and splitted[1] == "db": # data
             label = splitted[0][:-1]
             value = splitted[2]
 
             assert label not in labels, f"Label {label} already defined"
             labels[label] = position
 
-            if value.startswith('"'):
+            if value.startswith('"'): # string
                 value = value[1:-1]
                 data.append(Data(position, len(value)))
                 position += 1
-                for char in value:
+                for char in value: # string as array of chars
                     data.append(Data(position, ord(char)))
                     position += 1
                 continue
@@ -59,39 +60,45 @@ def translate(src: str):
             else:
                 value = labels[value]
 
-            if len(splitted) > 3 and splitted[3] == "dup":
+            if len(splitted) > 3 and splitted[3] == "dup": # buffer
                 count = value
                 for _ in range(count):
                     data.append(Data(position, 0))
                     position += 1
             else:
-                data.append(Data(position, value))
+                data.append(Data(position, value)) # single value
                 position += 1
+
             continue
 
-        opcode, *operand = line.split()
+        opcode, *operand = line.split() # instruction
         opcode = Opcode(opcode)
         if operand:
-            operand = operand[0]
+            operand = operand[0] # only one operand
         else:
             operand = None
 
         if operand and operand[0].isdigit():
             operand = value_to_number(operand)
 
-        instrs.append({"position": position, "opcode": opcode, "operand": operand})
+        instrs.append({"position": position, "opcode": opcode, "operand": operand, "src_line": src_line})
         position += 1
 
 
-    for instr in instrs:
-        if str(instr["operand"]).startswith("("):
-            instr["opcode"] += "I"
+    for instr in instrs: # indirect addressing
+        if str(instr["operand"]).startswith("["):
+            instr["opcode"] += "I" # LD -> LDI ...
             instr["operand"] = instr["operand"][1:-1]
 
-    for instr in instrs:
+    for instr in instrs: # replace labels with addresses
         if instr["operand"] in labels:
             label = instr["operand"]
             instr["operand"] = labels[label]
+
+    for instr in instrs: # check for unknown labels
+        if isinstance(instr["operand"], str):
+            raise ValueError(f"Unknown label in {instr}")
+
 
     return instrs, data
 
