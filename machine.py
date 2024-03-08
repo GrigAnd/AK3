@@ -15,6 +15,13 @@ class DataPath:
   in_addr = None
   out_addr = None
 
+  input = None
+  output = None
+
+  is_z = None
+
+  da_mux_state = None
+
   def __init__(self, data_memory_size: int, input_buffer: list, in_addr: int, out_addr: int) -> None:
     self.data_memory_size = data_memory_size
     self.data_memory = [0] * data_memory_size
@@ -25,6 +32,63 @@ class DataPath:
     self.in_addr = in_addr
     self.out_addr = out_addr
 
+  def latch_acc(self) -> None:
+      self.acc = self.alu_out
+      self.output = self.acc
+      self.is_z = self.acc == 0
+
+  def clr_acc(self) -> None:
+      self.acc = 0
+  
+  def da_mux(self, state: str) -> None:
+      self.da_mux_state = state
+
+  def eo(self) -> None:
+      eo_in, _ = self.decode_address()
+
+      if eo_in:
+          self.alu_1 = self.get_io()
+      else:
+          self.alu_1 = self.data_memory[self.data_address].value
+
+  def wr(self) -> None:
+      data = None
+
+      if self.da_mux_state == "input":
+          data = self.input
+      elif self.da_mux_state == "acc":
+          data = self.acc
+
+      _, wr_out = self.decode_address()
+
+      if wr_out:
+          self.set_io(data)
+      else:
+          self.data_memory[self.data_address].value = data
+
+  def get_io(self) -> int:
+      return self.input_buffer.pop(0)
+  
+  def set_io(self, value: int) -> None:
+      self.output_buffer.append(value)
+
+  def add_1(self) -> None:
+      self.alu_out = self.acc + 1
+
+  def sub_1(self) -> None:
+      self.alu_out = self.acc - 1
+
+  def sub(self) -> None:
+      self.alu_out = self.alu_1 - self.acc
+
+  def decode_address(self) -> tuple:
+      match self.data_address:
+          case self.in_addr:
+              return (True, False)
+          case self.out_addr:
+              return (False, True)
+          case _:
+              return (False, False)
 
 class ControlUnit:
     program_memory = None
@@ -123,12 +187,18 @@ class ControlUnit:
                 self.tick()
 
                 self.latch_pc(False)
-                
 
-            
+            case Opcode.SUB:
+                self.data_path.input = instr["operand"]
+                self.data_path.da_mux("input")
+                self.data_path.eo()
+                self.data_path.latch_acc()
+                self.tick()
 
+                self.data_path.sub()
+                self.tick()
 
-
+                self.latch_pc(False)
 
 
 
