@@ -7,12 +7,12 @@ class Opcode(str, Enum):
     LD = "LD" #
     ST = "ST" #
     # DIV = "DIV"
-    SUB = "SUB"
+    SUB = "SUB" #
     # ADD = "ADD"
-    INC = "INC"
-    DEC = "DEC"
+    INC = "INC" #
+    DEC = "DEC" #
     JMP = "JMP" #
-    # JNZ = "JNZ"
+    JNZ = "JNZ"
     JZ = "JZ" #
     # JG = "JG"
     # JL = "JL"
@@ -50,17 +50,17 @@ def write_data(data: List[Data], filename: str) -> None:
         buf = [json.dumps(datum) for datum in data]
         file.write("[" + ",\n".join(buf) + "]")
 
-def read_code(filename: str) -> List[Expression]:
+def read_code(filename: str) -> list:
     with open(filename, "r", encoding="utf-8") as file:
         code = json.load(file)
 
-    instrs: List[Expression] = []
+    instrs = []
 
     for instr in code:
-        opcode = Opcode(instr["opcode"])
-        operand = instr["operand"]
-        op_type = OperandType(instr["op_type"])
-        instrs.append(Expression(instr["position"], opcode, operand, op_type))
+        # opcode = Opcode(instr["opcode"])
+        # operand = instr["operand"]
+        # op_type = OperandType(instr["op_type"])
+        instrs.append(instr)
 
     return instrs
 
@@ -68,9 +68,9 @@ def read_data(filename: str) -> List[Data]:
     with open(filename, "r", encoding="utf-8") as file:
         data = json.load(file)
 
-    data_list: List[Data] = []
+    data_list = []
 
     for datum in data:
-        data_list.append(Data(datum["position"], datum["value"]))
+        data_list.append(datum)
 
     return data_list

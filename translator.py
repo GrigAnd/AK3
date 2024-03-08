@@ -124,7 +124,7 @@ if __name__ == "__main__":
     # assert len(sys.argv) == 4, "Wrong args: translator.py <asm_input_file> <output_data_file> <output_code_file>"
     # _, input_file, data_file, code_file = sys.argv
 
-    input_file = "hun.asm"
-    data_file = "hun_data.json"
-    code_file = "hun_code.json"
+    input_file = "code.asm"
+    data_file = "data.json"
+    code_file = "code.json"
     main(input_file, data_file, code_file)
