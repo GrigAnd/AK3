@@ -1,7 +1,7 @@
 import sys
 import shlex
 from typing import List, Tuple
-from isa import Opcode, Expression, Data, write_code, write_data
+from isa import Opcode, OperandType, write_code, write_data
 
 
 def clear_line(line: str) -> str:
@@ -48,10 +48,10 @@ def translate(src: str):
 
             if value.startswith('"'): # string
                 value = value[1:-1]
-                data.append(Data(position, len(value)))
+                data.append({"position": position, "value": len(value), "src_line": src_line})
                 position += 1
                 for char in value: # string as array of chars
-                    data.append(Data(position, ord(char)))
+                    data.append({"position": position, "value": ord(char), "src_line": src_line})
                     position += 1
                 continue
 
@@ -63,10 +63,10 @@ def translate(src: str):
             if len(splitted) > 3 and splitted[3] == "dup": # buffer
                 count = value
                 for _ in range(count):
-                    data.append(Data(position, 0))
+                    data.append({"position": position, "value": 0, "src_line": src_line})
                     position += 1
             else:
-                data.append(Data(position, value)) # single value
+                data.append({"position": position, "value": value, "src_line": src_line}) # single value
                 position += 1
 
             continue
@@ -81,14 +81,18 @@ def translate(src: str):
         if operand and operand[0].isdigit():
             operand = value_to_number(operand)
 
-        instrs.append({"position": position, "opcode": opcode, "operand": operand, "src_line": src_line})
+        instrs.append({"position": position, "opcode": opcode, "operand": operand, "op_type": None, "src_line": src_line})
         position += 1
 
 
     for instr in instrs: # indirect addressing
         if str(instr["operand"]).startswith("["):
-            instr["opcode"] += "I" # LD -> LDI ...
+            instr["op_type"] = OperandType.INDIRECT
             instr["operand"] = instr["operand"][1:-1]
+        elif instr["operand"] is not None:
+            instr["op_type"] = OperandType.DIRECT
+        else:
+            instr["op_type"] = OperandType.NONE
 
     for instr in instrs: # replace labels with addresses
         if instr["operand"] in labels:

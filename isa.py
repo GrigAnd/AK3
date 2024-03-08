@@ -4,31 +4,37 @@ from enum import Enum
 from typing import List
 
 class Opcode(str, Enum):
-    LD = "LD"
-    ST = "ST"
-    LDI = "LDI"
-    STI = "STI"
-    DIV = "DIV"
+    LD = "LD" #
+    ST = "ST" #
+    # DIV = "DIV"
     SUB = "SUB"
-    ADD = "ADD"
+    # ADD = "ADD"
     INC = "INC"
     DEC = "DEC"
-    JMP = "JMP"
-    JNZ = "JNZ"
-    JZ = "JZ"
-    JG = "JG"
-    JL = "JL"
-    JE = "JE"
-    JNE = "JNE"
-    HLT = "HLT"
-    CLR = "CLR"
+    JMP = "JMP" #
+    # JNZ = "JNZ"
+    JZ = "JZ" #
+    # JG = "JG"
+    # JL = "JL"
+    # JE = "JE"
+    # JNE = "JNE"
+    HLT = "HLT" #
+    CLR = "CLR" #
+
+    def __str__(self) -> str:
+        return self.value
+    
+class OperandType(str, Enum):
+    DIRECT = "DIRECT"
+    INDIRECT = "INDIRECT"
+    NONE = "NONE"
 
     def __str__(self) -> str:
         return self.value
 
-class Expression(namedtuple("Expression", ["position", "opcode", "operand"])):
+class Expression(namedtuple("Expression", ["position", "opcode", "operand", "op_type"])):
     def __str__(self) -> str:
-        return f"{self.position} {self.opcode} {self.operand}"
+        return f"{self.position} {self.opcode} {self.operand} {self.op_type}"
 
 class Data(namedtuple("Data", ["position", "value"])):
     def __str__(self) -> str:
@@ -53,7 +59,8 @@ def read_code(filename: str) -> List[Expression]:
     for instr in code:
         opcode = Opcode(instr["opcode"])
         operand = instr["operand"]
-        instrs.append(Expression(instr["position"], opcode, operand))
+        op_type = OperandType(instr["op_type"])
+        instrs.append(Expression(instr["position"], opcode, operand, op_type))
 
     return instrs
 
