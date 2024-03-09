@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "asm"
-version = "0.0.1"
+name = "ak3"
+version = "1.1.1"
 description = "An example project for Computer System Architecture class."
-authors = ["Andrey Grigorev"]
+authors = ["Andrey Grigorev <a.a@gmail.com>"]
 license = "BSD"
 readme = "README.md"
 
