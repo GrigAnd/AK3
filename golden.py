@@ -8,10 +8,10 @@ import machine
 import pytest
 import translator
 
+
 @pytest.mark.golden_test("golden/*.yml")
 def test_translator_and_machine(golden, caplog):
-
-  # Установим уровень отладочного вывода на DEBUG
+    # Установим уровень отладочного вывода на DEBUG
     caplog.set_level(logging.DEBUG)
 
     # Создаём временную папку для тестирования приложения.
