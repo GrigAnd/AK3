@@ -1,8 +1,38 @@
+from enum import Enum
 import logging
 import sys
 
 from isa import Opcode, OperandType, read_code, read_data
 
+class ALU(str, Enum):
+    ADD = "ADD"
+    SUB = "SUB"
+    DIVR = "DIVR"
+    ALU_BYPASS = "ALU_BYPASS"
+    ADD_1 = "ADD_1"
+    SUB_1 = "SUB_1"
+    CLR = "CLR"
+
+    def __str__(self) -> str:
+        return self.value
+    
+    def get_lambda(self):
+        match self:
+            case ALU.ADD:
+                return lambda dp: dp.acc + dp.alu_1
+            case ALU.SUB:
+                return lambda dp: dp.acc - dp.alu_1
+            case ALU.DIVR:
+                return lambda dp: dp.acc % dp.alu_1
+            case ALU.ALU_BYPASS:
+                return lambda dp: dp.alu_1
+            case ALU.ADD_1:
+                return lambda dp: dp.acc + 1
+            case ALU.SUB_1:
+                return lambda dp: dp.acc - 1
+            case ALU.CLR:
+                return lambda dp: 0
+            
 
 class DataPath:
     data_memory = None
@@ -16,13 +46,12 @@ class DataPath:
     in_addr = None
     out_addr = None
 
-    input = None
-    output = None
-
     alu_1: int = 0
     alu_out: int = 0
 
     is_indirect: bool = None
+
+    alu_operation = ALU.ALU_BYPASS
 
     def __init__(
         self,
@@ -45,11 +74,14 @@ class DataPath:
         self.is_indirect = False
 
     def latch_acc(self) -> None:
-        self.acc = self.alu_out
-        self.output = self.acc
+        self.acc = ALU.get_lambda(self.alu_operation)(self)
+        # self.acc = self.alu_out
 
     def is_z(self) -> bool:
         return self.acc == 0
+    
+    def is_n(self) -> bool:
+        return self.acc < 0
 
     def clr_acc(self) -> None:
         self.acc = 0
@@ -83,18 +115,31 @@ class DataPath:
         self.output_buffer.append(chr(value))
 
     def add_1(self) -> None:
-        self.alu_out = self.acc + 1
+        # self.alu_out = self.acc + 1
+        self.alu_operation = ALU.ADD_1
 
     def sub_1(self) -> None:
-        self.alu_out = self.acc - 1
+        # self.alu_out = self.acc - 1
+        self.alu_operation = ALU.SUB_1
 
     def sub(self) -> None:
-        self.alu_out = self.alu_1 - self.acc
+        # self.alu_out = self.acc - self.alu_1
+        self.alu_operation = ALU.SUB
+
+    def add(self) -> None:
+        # self.alu_out = self.acc + self.alu_1
+        self.alu_operation = ALU.ADD
+
+    def divr(self) -> None:
+        # self.alu_out = self.acc % self.alu_1
+        self.alu_operation = ALU.DIVR
 
     def alu_bypass(self) -> None:
-        self.alu_out = self.alu_1
+        # self.alu_out = self.alu_1
+        self.alu_operation = ALU.ALU_BYPASS
 
     def decode_address(self) -> tuple:
+        """Returns (is_in, is_out) tuple."""
         match self.data_address:
             case self.in_addr:
                 return (True, False)
@@ -141,45 +186,50 @@ class ControlUnit:
         match opcode:
             case Opcode.HLT:
                 raise StopIteration
+            
             case Opcode.JMP:
                 self.latch_pc(True)
-            case Opcode.JZ:
-                self.data_path.latch_acc()
-                self.tick()
 
+            case Opcode.JZ:
+                self.tick()
                 if self.data_path.is_z():
                     self.latch_pc(True)
                 else:
                     self.latch_pc(False)
                 self.tick()
-            case Opcode.JNZ:
-                self.data_path.latch_acc()
-                self.tick()
 
+            case Opcode.JNZ:
+                self.tick()
                 if not self.data_path.is_z():
                     self.latch_pc(True)
                 else:
                     self.latch_pc(False)
+
+            case Opcode.JN:
                 self.tick()
+                if self.data_path.is_n():
+                    self.latch_pc(True)
+                else:
+                    self.latch_pc(False)
 
             case Opcode.CLR:
                 self.data_path.clr_acc()
-                self.latch_pc(False)
+                self.data_path.latch_acc()
                 self.tick()
+                self.latch_pc(False)
+
             case Opcode.LD:
                 self.data_path.data_address = instr["operand"]
                 self.data_path.eo()
                 self.data_path.alu_bypass()
                 self.data_path.latch_acc()
                 self.tick()
-
                 if instr["op_type"] == OperandType.INDIRECT:
                     self.data_path.data_address = self.data_path.acc
                     self.data_path.eo()
                     self.data_path.alu_bypass()
                     self.data_path.latch_acc()
                     self.tick()
-
                 self.latch_pc(False)
 
             case Opcode.ST:
@@ -191,26 +241,9 @@ class ControlUnit:
                     self.data_path.data_address = instr["operand"]
                     self.data_path.eo()
                     self.tick()
-
                     self.data_path.data_address = self.data_path.alu_1
                     self.data_path.wr()
                     self.tick()
-
-
-
-                    
-
-                #     self.data_path.data_address = self.data_path.alu_1
-                #     self.data_path.wr()
-                #     self.tick()
-                # else:
-                #     self.data_path.data_address = instr["operand"]
-                #     self.data_path.eo()
-                #     self.data_path.alu_bypass()
-                #     self.data_path.latch_acc()
-                #     self.data_path.wr()
-                #     self.tick()
-
                 self.latch_pc(False)
 
             case Opcode.INC:
@@ -218,10 +251,8 @@ class ControlUnit:
                 self.data_path.latch_acc()
                 self.data_path.add_1()
                 self.tick()
-
                 self.data_path.latch_acc()
                 self.tick()
-
                 self.latch_pc(False)
 
             case Opcode.DEC:
@@ -229,21 +260,32 @@ class ControlUnit:
                 self.data_path.latch_acc()
                 self.data_path.sub_1()
                 self.tick()
-
                 self.data_path.latch_acc()
                 self.tick()
-
                 self.latch_pc(False)
 
             case Opcode.SUB:
                 self.data_path.data_address = instr["operand"]
                 self.data_path.eo()
-                self.data_path.latch_acc()
                 self.tick()
-
                 self.data_path.sub()
-                self.tick()
+                self.data_path.latch_acc()
+                self.latch_pc(False)
 
+            case Opcode.ADD:
+                self.data_path.data_address = instr["operand"]
+                self.data_path.eo()
+                self.tick()
+                self.data_path.add()
+                self.data_path.latch_acc()
+                self.latch_pc(False)
+
+            case Opcode.DIVR:
+                self.data_path.data_address = instr["operand"]
+                self.data_path.eo()
+                self.tick()
+                self.data_path.divr()
+                self.data_path.latch_acc()
                 self.latch_pc(False)
 
     def __repr__(self) -> str:
@@ -322,7 +364,7 @@ def main(input_file: str, data_file: str, code_file: str) -> None:
         data_memory_size=100,
         in_addr=4343,
         out_addr=4242,
-        limit=1000,
+        limit=1000000,
     )
 
     print("".join(out))
@@ -333,8 +375,8 @@ if __name__ == "__main__":
     logging.getLogger().setLevel(logging.DEBUG)
     # assert len(sys.argv) == 4, "Wrong args: machine.py <code_file> <data_file> <input_file>"
     # _, code_file, data_file, input_file = sys.argv
-    code_file = "code.json"
-    data_file = "data.json"
-    input_file = "input.txt"
+    code_file = "./translated/code.json"
+    data_file = "./translated/data.json"
+    input_file = "./input.txt"
 
     main(input_file, data_file, code_file)

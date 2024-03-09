@@ -4,22 +4,19 @@ from enum import Enum
 from typing import List
 
 class Opcode(str, Enum):
-    LD = "LD" #
-    ST = "ST" #
-    # DIV = "DIV"
-    SUB = "SUB" #
-    # ADD = "ADD"
-    INC = "INC" #
-    DEC = "DEC" #
-    JMP = "JMP" #
+    LD = "LD"
+    ST = "ST"
+    SUB = "SUB"
+    ADD = "ADD"
+    DIVR = "DIVR"
+    INC = "INC"
+    DEC = "DEC"
+    JMP = "JMP"
     JNZ = "JNZ"
-    JZ = "JZ" #
-    # JG = "JG"
-    # JL = "JL"
-    # JE = "JE"
-    # JNE = "JNE"
-    HLT = "HLT" #
-    CLR = "CLR" #
+    JZ = "JZ"
+    JN = "JN"
+    HLT = "HLT"
+    CLR = "CLR"
 
     def __str__(self) -> str:
         return self.value
