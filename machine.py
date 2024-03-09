@@ -306,7 +306,7 @@ def main(input_file: str, data_file: str, code_file: str) -> None:
         code,
         data,
         tokens,
-        data_memory_size=100,
+        data_memory_size=1024,
         in_addr=4343,
         out_addr=4242,
         limit=1000,
