@@ -14,6 +14,7 @@ def value_to_number(value: str) -> int:
         return int(value, 16)
     return int(value)
 
+
 def prepare_lines(lines: list) -> list:
     prepared = []
     for line in lines:
@@ -22,9 +23,6 @@ def prepare_lines(lines: list) -> list:
             continue
         prepared.append(line)
     return prepared
-
-
-
 
 
 def translate(src: str):
@@ -79,11 +77,11 @@ def translate(src: str):
         )
         position += 1
 
-
     parse_indirect_operands(instrs)
     set_labels(instrs, labels)
 
     return instrs, data
+
 
 def parse_buffer(splitted: list, position: int, data: list, src_line: int, value: int) -> int:
     if len(splitted) > 3 and splitted[3] == "dup":  # buffer
@@ -97,11 +95,13 @@ def parse_buffer(splitted: list, position: int, data: list, src_line: int, value
 
     return position
 
+
 def parse_data_arg(value: str, labels: dict) -> int:
     if value[0].isdigit():  # number
         return value_to_number(value)
 
     return labels[value]
+
 
 def parse_instruction(line: str) -> tuple:
     opcode, *operand = line.split()
@@ -116,16 +116,19 @@ def parse_instruction(line: str) -> tuple:
 
     return opcode, operand
 
+
 def add_string(data: list, position: int, value: str, src_line: int) -> None:
     value = value[1:-1]
     add_data(data, position, len(value), src_line)
     position += 1
     for char in value:  # string as array of chars
-        add_data(data, position, ord(char),src_line)
+        add_data(data, position, ord(char), src_line)
         position += 1
+
 
 def add_data(data: list, position: int, value: int, src_line: int) -> None:
     data.append({"position": position, "value": value, "src_line": src_line})
+
 
 def parse_indirect_operands(instrs: list) -> None:
     for instr in instrs:  # indirect addressing

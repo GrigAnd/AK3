@@ -238,7 +238,6 @@ class ControlUnit:
             self.latch_pc(False)
         self.tick()
 
-
     def __repr__(self) -> str:
         r = "TICK: {:3} PC: {:3} ACC: {:3} MEM: {:3} ADDR: {:3}".format(
             self.get_tick() if self.get_tick() is not None else "N/A",
