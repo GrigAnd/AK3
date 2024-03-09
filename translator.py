@@ -61,7 +61,7 @@ def translate(src: str):
             labels[label] = position
 
             if value.startswith('"'):  # string
-                position = add_string
+                position = add_string(data, position, value, src_line)
                 continue
 
             value = parse_data_arg(value, labels)
@@ -117,13 +117,15 @@ def parse_instruction(line: str) -> tuple:
     return opcode, operand
 
 
-def add_string(data: list, position: int, value: str, src_line: int) -> None:
+def add_string(data: list, position: int, value: str, src_line: int) -> int:
     value = value[1:-1]
     add_data(data, position, len(value), src_line)
     position += 1
     for char in value:  # string as array of chars
         add_data(data, position, ord(char), src_line)
         position += 1
+
+    return position
 
 
 def add_data(data: list, position: int, value: int, src_line: int) -> None:

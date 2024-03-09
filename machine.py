@@ -309,7 +309,7 @@ def main(input_file: str, data_file: str, code_file: str) -> None:
         data_memory_size=100,
         in_addr=4343,
         out_addr=4242,
-        limit=200000000,
+        limit=1000,
     )
 
     print("".join(out))

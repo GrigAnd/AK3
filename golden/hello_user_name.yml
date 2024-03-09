@@ -1,0 +1,480 @@
+in_source: |-
+  SECTION .data
+  prompt:     db "What is your name?"
+  prompt_ptr: db prompt           ; prompt_ptr = &prompt
+  greet:      db "Hello, "
+  greet_ptr:  db greet            ; greet_ptr = &greet
+  n_char:     db 10               ; \n
+  after:      db 33               ; "!"
+  ptr:        db 0
+  len:        db 0
+  buf:        db 0                ; input buffer
+  name:       db 20       dup     ; name
+  name_ptr:   db name             ; name_ptr = &name
+
+
+  SECTION .text
+  _start:
+          LD  [prompt_ptr]        ; *prompt_ptr = prompt[0]
+          ST  len
+          LD  prompt_ptr          ; ptr = prompt_ptr
+          ST  ptr                 ; ptr = prompt_ptr
+  _loop_prompt:
+          LD  ptr
+          INC
+          ST  ptr                 ; ptr++
+          LD  [ptr]               ; buf = *ptr
+          ST  4242                ; output buffer
+          LD  len
+          DEC
+          ST  len                 ; len--
+          JNZ _loop_prompt        ; if len != 0, goto _loop_prompt
+
+          LD  n_char              ; \n
+          ST  4242                ; output buffer
+
+          CLR
+          ST len                  ; len = 0
+          LD name_ptr
+          INC
+          ST ptr                  ; ptr = &name[1]
+
+  _loop_name_in:
+          LD  4343                ; input
+          ST  buf                 ; buf = input
+          SUB n_char              ; buf -= '\n'
+          JZ  _store_name_len     ; if buf == '\n', goto _store_name_len
+          LD  buf
+          ST  [ptr]               ; *ptr = buf
+          LD  ptr
+          INC
+          ST  ptr                 ; ptr++
+          LD  len
+          INC
+          ST  len                 ; len++
+          JMP _loop_name_in
+
+
+  _store_name_len:
+          LD len
+          ST name                 ; name[0] = len
+
+
+          LD [greet_ptr]          ; *greet_ptr = greet[0]
+          ST len 
+          LD greet_ptr
+          ST ptr                  ; ptr = &greet[0]
+  _loop_greet:
+          LD  ptr
+          INC
+          ST  ptr                 ; ptr++
+          LD  [ptr]               ; buf = *ptr
+          ST  4242                ; output
+          LD  len
+          DEC
+          ST  len                 ; len--
+          JNZ _loop_greet         ; if len != 0, goto _loop_greet
+
+
+          LD [name_ptr]           ; *name_ptr = name[0]
+          ST len 
+          LD name_ptr
+          ST ptr                  ; ptr = &name[0]
+  _loop_name_out:
+          LD  ptr
+          INC
+          ST  ptr                 ; ptr++
+          LD  [ptr]               ; buf = *ptr
+          ST  4242                ; output
+          LD  len
+          DEC
+          ST  len                 ; len--
+          JNZ _loop_name_out      ; if len != 0, goto _loop_greet
+
+
+  _print_after:
+          LD after
+          ST 4242                 ; output buffer
+in_stdin: |-
+  Andrey
+
+out_stdout: |
+  source LoC: 96, code instrs: 63, data: 55
+  ============================================================
+  What is your name?
+
+  Instructions executed: 251
+
+out_code: |-
+  [{"position": 0, "opcode": "LD", "operand": 19, "op_type": "INDIRECT", "src_line": 15},
+  {"position": 1, "opcode": "ST", "operand": 32, "op_type": "DIRECT", "src_line": 16},
+  {"position": 2, "opcode": "LD", "operand": 19, "op_type": "DIRECT", "src_line": 17},
+  {"position": 3, "opcode": "ST", "operand": 31, "op_type": "DIRECT", "src_line": 18},
+  {"position": 4, "opcode": "LD", "operand": 31, "op_type": "DIRECT", "src_line": 20},
+  {"position": 5, "opcode": "INC", "operand": null, "op_type": "NONE", "src_line": 21},
+  {"position": 6, "opcode": "ST", "operand": 31, "op_type": "DIRECT", "src_line": 22},
+  {"position": 7, "opcode": "LD", "operand": 31, "op_type": "INDIRECT", "src_line": 23},
+  {"position": 8, "opcode": "ST", "operand": 4242, "op_type": "DIRECT", "src_line": 24},
+  {"position": 9, "opcode": "LD", "operand": 32, "op_type": "DIRECT", "src_line": 25},
+  {"position": 10, "opcode": "DEC", "operand": null, "op_type": "NONE", "src_line": 26},
+  {"position": 11, "opcode": "ST", "operand": 32, "op_type": "DIRECT", "src_line": 27},
+  {"position": 12, "opcode": "JNZ", "operand": 4, "op_type": "DIRECT", "src_line": 28},
+  {"position": 13, "opcode": "LD", "operand": 29, "op_type": "DIRECT", "src_line": 29},
+  {"position": 14, "opcode": "ST", "operand": 4242, "op_type": "DIRECT", "src_line": 30},
+  {"position": 15, "opcode": "CLR", "operand": null, "op_type": "NONE", "src_line": 31},
+  {"position": 16, "opcode": "ST", "operand": 32, "op_type": "DIRECT", "src_line": 32},
+  {"position": 17, "opcode": "LD", "operand": 54, "op_type": "DIRECT", "src_line": 33},
+  {"position": 18, "opcode": "INC", "operand": null, "op_type": "NONE", "src_line": 34},
+  {"position": 19, "opcode": "ST", "operand": 31, "op_type": "DIRECT", "src_line": 35},
+  {"position": 20, "opcode": "LD", "operand": 4343, "op_type": "DIRECT", "src_line": 37},
+  {"position": 21, "opcode": "ST", "operand": 33, "op_type": "DIRECT", "src_line": 38},
+  {"position": 22, "opcode": "SUB", "operand": 29, "op_type": "DIRECT", "src_line": 39},
+  {"position": 23, "opcode": "JZ", "operand": 33, "op_type": "DIRECT", "src_line": 40},
+  {"position": 24, "opcode": "LD", "operand": 33, "op_type": "DIRECT", "src_line": 41},
+  {"position": 25, "opcode": "ST", "operand": 31, "op_type": "INDIRECT", "src_line": 42},
+  {"position": 26, "opcode": "LD", "operand": 31, "op_type": "DIRECT", "src_line": 43},
+  {"position": 27, "opcode": "INC", "operand": null, "op_type": "NONE", "src_line": 44},
+  {"position": 28, "opcode": "ST", "operand": 31, "op_type": "DIRECT", "src_line": 45},
+  {"position": 29, "opcode": "LD", "operand": 32, "op_type": "DIRECT", "src_line": 46},
+  {"position": 30, "opcode": "INC", "operand": null, "op_type": "NONE", "src_line": 47},
+  {"position": 31, "opcode": "ST", "operand": 32, "op_type": "DIRECT", "src_line": 48},
+  {"position": 32, "opcode": "JMP", "operand": 20, "op_type": "DIRECT", "src_line": 49},
+  {"position": 33, "opcode": "LD", "operand": 32, "op_type": "DIRECT", "src_line": 51},
+  {"position": 34, "opcode": "ST", "operand": 34, "op_type": "DIRECT", "src_line": 52},
+  {"position": 35, "opcode": "LD", "operand": 28, "op_type": "INDIRECT", "src_line": 53},
+  {"position": 36, "opcode": "ST", "operand": 32, "op_type": "DIRECT", "src_line": 54},
+  {"position": 37, "opcode": "LD", "operand": 28, "op_type": "DIRECT", "src_line": 55},
+  {"position": 38, "opcode": "ST", "operand": 31, "op_type": "DIRECT", "src_line": 56},
+  {"position": 39, "opcode": "LD", "operand": 31, "op_type": "DIRECT", "src_line": 58},
+  {"position": 40, "opcode": "INC", "operand": null, "op_type": "NONE", "src_line": 59},
+  {"position": 41, "opcode": "ST", "operand": 31, "op_type": "DIRECT", "src_line": 60},
+  {"position": 42, "opcode": "LD", "operand": 31, "op_type": "INDIRECT", "src_line": 61},
+  {"position": 43, "opcode": "ST", "operand": 4242, "op_type": "DIRECT", "src_line": 62},
+  {"position": 44, "opcode": "LD", "operand": 32, "op_type": "DIRECT", "src_line": 63},
+  {"position": 45, "opcode": "DEC", "operand": null, "op_type": "NONE", "src_line": 64},
+  {"position": 46, "opcode": "ST", "operand": 32, "op_type": "DIRECT", "src_line": 65},
+  {"position": 47, "opcode": "JNZ", "operand": 39, "op_type": "DIRECT", "src_line": 66},
+  {"position": 48, "opcode": "LD", "operand": 54, "op_type": "INDIRECT", "src_line": 67},
+  {"position": 49, "opcode": "ST", "operand": 32, "op_type": "DIRECT", "src_line": 68},
+  {"position": 50, "opcode": "LD", "operand": 54, "op_type": "DIRECT", "src_line": 69},
+  {"position": 51, "opcode": "ST", "operand": 31, "op_type": "DIRECT", "src_line": 70},
+  {"position": 52, "opcode": "LD", "operand": 31, "op_type": "DIRECT", "src_line": 72},
+  {"position": 53, "opcode": "INC", "operand": null, "op_type": "NONE", "src_line": 73},
+  {"position": 54, "opcode": "ST", "operand": 31, "op_type": "DIRECT", "src_line": 74},
+  {"position": 55, "opcode": "LD", "operand": 31, "op_type": "INDIRECT", "src_line": 75},
+  {"position": 56, "opcode": "ST", "operand": 4242, "op_type": "DIRECT", "src_line": 76},
+  {"position": 57, "opcode": "LD", "operand": 32, "op_type": "DIRECT", "src_line": 77},
+  {"position": 58, "opcode": "DEC", "operand": null, "op_type": "NONE", "src_line": 78},
+  {"position": 59, "opcode": "ST", "operand": 32, "op_type": "DIRECT", "src_line": 79},
+  {"position": 60, "opcode": "JNZ", "operand": 52, "op_type": "DIRECT", "src_line": 80},
+  {"position": 61, "opcode": "LD", "operand": 30, "op_type": "DIRECT", "src_line": 82},
+  {"position": 62, "opcode": "ST", "operand": 4242, "op_type": "DIRECT", "src_line": 83}]
+out_log: |
+  DEBUG   machine:run           TICK:   2 PC:   1 ACC:  18 MEM:  18 ADDR:   0 	LD
+  DEBUG   machine:run           TICK:   3 PC:   2 ACC:  18 MEM:  18 ADDR:  32 	ST
+  DEBUG   machine:run           TICK:   4 PC:   3 ACC:   0 MEM:   0 ADDR:  19 	LD
+  DEBUG   machine:run           TICK:   5 PC:   4 ACC:   0 MEM:   0 ADDR:  31 	ST
+  DEBUG   machine:run           TICK:   6 PC:   5 ACC:   0 MEM:   0 ADDR:  31 	LD
+  DEBUG   machine:run           TICK:   8 PC:   6 ACC:   1 MEM:   0 ADDR:  31 	INC
+  DEBUG   machine:run           TICK:   9 PC:   7 ACC:   1 MEM:   1 ADDR:  31 	ST
+  DEBUG   machine:run           TICK:  11 PC:   8 ACC:  87 MEM:  87 ADDR:   1 	LD
+  DEBUG   machine:run           TICK:  12 PC:   9 ACC:  87 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK:  13 PC:  10 ACC:  18 MEM:  18 ADDR:  32 	LD
+  DEBUG   machine:run           TICK:  15 PC:  11 ACC:  17 MEM:  18 ADDR:  32 	DEC
+  DEBUG   machine:run           TICK:  16 PC:  12 ACC:  17 MEM:  17 ADDR:  32 	ST
+  DEBUG   machine:run           TICK:  17 PC:   4 ACC:  17 MEM:  17 ADDR:  32 	ST
+  DEBUG   machine:run           TICK:  18 PC:   5 ACC:   1 MEM:   1 ADDR:  31 	LD
+  DEBUG   machine:run           TICK:  20 PC:   6 ACC:   2 MEM:   1 ADDR:  31 	INC
+  DEBUG   machine:run           TICK:  21 PC:   7 ACC:   2 MEM:   2 ADDR:  31 	ST
+  DEBUG   machine:run           TICK:  23 PC:   8 ACC: 104 MEM: 104 ADDR:   2 	LD
+  DEBUG   machine:run           TICK:  24 PC:   9 ACC: 104 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK:  25 PC:  10 ACC:  17 MEM:  17 ADDR:  32 	LD
+  DEBUG   machine:run           TICK:  27 PC:  11 ACC:  16 MEM:  17 ADDR:  32 	DEC
+  DEBUG   machine:run           TICK:  28 PC:  12 ACC:  16 MEM:  16 ADDR:  32 	ST
+  DEBUG   machine:run           TICK:  29 PC:   4 ACC:  16 MEM:  16 ADDR:  32 	ST
+  DEBUG   machine:run           TICK:  30 PC:   5 ACC:   2 MEM:   2 ADDR:  31 	LD
+  DEBUG   machine:run           TICK:  32 PC:   6 ACC:   3 MEM:   2 ADDR:  31 	INC
+  DEBUG   machine:run           TICK:  33 PC:   7 ACC:   3 MEM:   3 ADDR:  31 	ST
+  DEBUG   machine:run           TICK:  35 PC:   8 ACC:  97 MEM:  97 ADDR:   3 	LD
+  DEBUG   machine:run           TICK:  36 PC:   9 ACC:  97 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK:  37 PC:  10 ACC:  16 MEM:  16 ADDR:  32 	LD
+  DEBUG   machine:run           TICK:  39 PC:  11 ACC:  15 MEM:  16 ADDR:  32 	DEC
+  DEBUG   machine:run           TICK:  40 PC:  12 ACC:  15 MEM:  15 ADDR:  32 	ST
+  DEBUG   machine:run           TICK:  41 PC:   4 ACC:  15 MEM:  15 ADDR:  32 	ST
+  DEBUG   machine:run           TICK:  42 PC:   5 ACC:   3 MEM:   3 ADDR:  31 	LD
+  DEBUG   machine:run           TICK:  44 PC:   6 ACC:   4 MEM:   3 ADDR:  31 	INC
+  DEBUG   machine:run           TICK:  45 PC:   7 ACC:   4 MEM:   4 ADDR:  31 	ST
+  DEBUG   machine:run           TICK:  47 PC:   8 ACC: 116 MEM: 116 ADDR:   4 	LD
+  DEBUG   machine:run           TICK:  48 PC:   9 ACC: 116 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK:  49 PC:  10 ACC:  15 MEM:  15 ADDR:  32 	LD
+  DEBUG   machine:run           TICK:  51 PC:  11 ACC:  14 MEM:  15 ADDR:  32 	DEC
+  DEBUG   machine:run           TICK:  52 PC:  12 ACC:  14 MEM:  14 ADDR:  32 	ST
+  DEBUG   machine:run           TICK:  53 PC:   4 ACC:  14 MEM:  14 ADDR:  32 	ST
+  DEBUG   machine:run           TICK:  54 PC:   5 ACC:   4 MEM:   4 ADDR:  31 	LD
+  DEBUG   machine:run           TICK:  56 PC:   6 ACC:   5 MEM:   4 ADDR:  31 	INC
+  DEBUG   machine:run           TICK:  57 PC:   7 ACC:   5 MEM:   5 ADDR:  31 	ST
+  DEBUG   machine:run           TICK:  59 PC:   8 ACC:  32 MEM:  32 ADDR:   5 	LD
+  DEBUG   machine:run           TICK:  60 PC:   9 ACC:  32 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK:  61 PC:  10 ACC:  14 MEM:  14 ADDR:  32 	LD
+  DEBUG   machine:run           TICK:  63 PC:  11 ACC:  13 MEM:  14 ADDR:  32 	DEC
+  DEBUG   machine:run           TICK:  64 PC:  12 ACC:  13 MEM:  13 ADDR:  32 	ST
+  DEBUG   machine:run           TICK:  65 PC:   4 ACC:  13 MEM:  13 ADDR:  32 	ST
+  DEBUG   machine:run           TICK:  66 PC:   5 ACC:   5 MEM:   5 ADDR:  31 	LD
+  DEBUG   machine:run           TICK:  68 PC:   6 ACC:   6 MEM:   5 ADDR:  31 	INC
+  DEBUG   machine:run           TICK:  69 PC:   7 ACC:   6 MEM:   6 ADDR:  31 	ST
+  DEBUG   machine:run           TICK:  71 PC:   8 ACC: 105 MEM: 105 ADDR:   6 	LD
+  DEBUG   machine:run           TICK:  72 PC:   9 ACC: 105 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK:  73 PC:  10 ACC:  13 MEM:  13 ADDR:  32 	LD
+  DEBUG   machine:run           TICK:  75 PC:  11 ACC:  12 MEM:  13 ADDR:  32 	DEC
+  DEBUG   machine:run           TICK:  76 PC:  12 ACC:  12 MEM:  12 ADDR:  32 	ST
+  DEBUG   machine:run           TICK:  77 PC:   4 ACC:  12 MEM:  12 ADDR:  32 	ST
+  DEBUG   machine:run           TICK:  78 PC:   5 ACC:   6 MEM:   6 ADDR:  31 	LD
+  DEBUG   machine:run           TICK:  80 PC:   6 ACC:   7 MEM:   6 ADDR:  31 	INC
+  DEBUG   machine:run           TICK:  81 PC:   7 ACC:   7 MEM:   7 ADDR:  31 	ST
+  DEBUG   machine:run           TICK:  83 PC:   8 ACC: 115 MEM: 115 ADDR:   7 	LD
+  DEBUG   machine:run           TICK:  84 PC:   9 ACC: 115 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK:  85 PC:  10 ACC:  12 MEM:  12 ADDR:  32 	LD
+  DEBUG   machine:run           TICK:  87 PC:  11 ACC:  11 MEM:  12 ADDR:  32 	DEC
+  DEBUG   machine:run           TICK:  88 PC:  12 ACC:  11 MEM:  11 ADDR:  32 	ST
+  DEBUG   machine:run           TICK:  89 PC:   4 ACC:  11 MEM:  11 ADDR:  32 	ST
+  DEBUG   machine:run           TICK:  90 PC:   5 ACC:   7 MEM:   7 ADDR:  31 	LD
+  DEBUG   machine:run           TICK:  92 PC:   6 ACC:   8 MEM:   7 ADDR:  31 	INC
+  DEBUG   machine:run           TICK:  93 PC:   7 ACC:   8 MEM:   8 ADDR:  31 	ST
+  DEBUG   machine:run           TICK:  95 PC:   8 ACC:  32 MEM:  32 ADDR:   8 	LD
+  DEBUG   machine:run           TICK:  96 PC:   9 ACC:  32 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK:  97 PC:  10 ACC:  11 MEM:  11 ADDR:  32 	LD
+  DEBUG   machine:run           TICK:  99 PC:  11 ACC:  10 MEM:  11 ADDR:  32 	DEC
+  DEBUG   machine:run           TICK: 100 PC:  12 ACC:  10 MEM:  10 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 101 PC:   4 ACC:  10 MEM:  10 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 102 PC:   5 ACC:   8 MEM:   8 ADDR:  31 	LD
+  DEBUG   machine:run           TICK: 104 PC:   6 ACC:   9 MEM:   8 ADDR:  31 	INC
+  DEBUG   machine:run           TICK: 105 PC:   7 ACC:   9 MEM:   9 ADDR:  31 	ST
+  DEBUG   machine:run           TICK: 107 PC:   8 ACC: 121 MEM: 121 ADDR:   9 	LD
+  DEBUG   machine:run           TICK: 108 PC:   9 ACC: 121 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK: 109 PC:  10 ACC:  10 MEM:  10 ADDR:  32 	LD
+  DEBUG   machine:run           TICK: 111 PC:  11 ACC:   9 MEM:  10 ADDR:  32 	DEC
+  DEBUG   machine:run           TICK: 112 PC:  12 ACC:   9 MEM:   9 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 113 PC:   4 ACC:   9 MEM:   9 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 114 PC:   5 ACC:   9 MEM:   9 ADDR:  31 	LD
+  DEBUG   machine:run           TICK: 116 PC:   6 ACC:  10 MEM:   9 ADDR:  31 	INC
+  DEBUG   machine:run           TICK: 117 PC:   7 ACC:  10 MEM:  10 ADDR:  31 	ST
+  DEBUG   machine:run           TICK: 119 PC:   8 ACC: 111 MEM: 111 ADDR:  10 	LD
+  DEBUG   machine:run           TICK: 120 PC:   9 ACC: 111 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK: 121 PC:  10 ACC:   9 MEM:   9 ADDR:  32 	LD
+  DEBUG   machine:run           TICK: 123 PC:  11 ACC:   8 MEM:   9 ADDR:  32 	DEC
+  DEBUG   machine:run           TICK: 124 PC:  12 ACC:   8 MEM:   8 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 125 PC:   4 ACC:   8 MEM:   8 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 126 PC:   5 ACC:  10 MEM:  10 ADDR:  31 	LD
+  DEBUG   machine:run           TICK: 128 PC:   6 ACC:  11 MEM:  10 ADDR:  31 	INC
+  DEBUG   machine:run           TICK: 129 PC:   7 ACC:  11 MEM:  11 ADDR:  31 	ST
+  DEBUG   machine:run           TICK: 131 PC:   8 ACC: 117 MEM: 117 ADDR:  11 	LD
+  DEBUG   machine:run           TICK: 132 PC:   9 ACC: 117 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK: 133 PC:  10 ACC:   8 MEM:   8 ADDR:  32 	LD
+  DEBUG   machine:run           TICK: 135 PC:  11 ACC:   7 MEM:   8 ADDR:  32 	DEC
+  DEBUG   machine:run           TICK: 136 PC:  12 ACC:   7 MEM:   7 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 137 PC:   4 ACC:   7 MEM:   7 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 138 PC:   5 ACC:  11 MEM:  11 ADDR:  31 	LD
+  DEBUG   machine:run           TICK: 140 PC:   6 ACC:  12 MEM:  11 ADDR:  31 	INC
+  DEBUG   machine:run           TICK: 141 PC:   7 ACC:  12 MEM:  12 ADDR:  31 	ST
+  DEBUG   machine:run           TICK: 143 PC:   8 ACC: 114 MEM: 114 ADDR:  12 	LD
+  DEBUG   machine:run           TICK: 144 PC:   9 ACC: 114 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK: 145 PC:  10 ACC:   7 MEM:   7 ADDR:  32 	LD
+  DEBUG   machine:run           TICK: 147 PC:  11 ACC:   6 MEM:   7 ADDR:  32 	DEC
+  DEBUG   machine:run           TICK: 148 PC:  12 ACC:   6 MEM:   6 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 149 PC:   4 ACC:   6 MEM:   6 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 150 PC:   5 ACC:  12 MEM:  12 ADDR:  31 	LD
+  DEBUG   machine:run           TICK: 152 PC:   6 ACC:  13 MEM:  12 ADDR:  31 	INC
+  DEBUG   machine:run           TICK: 153 PC:   7 ACC:  13 MEM:  13 ADDR:  31 	ST
+  DEBUG   machine:run           TICK: 155 PC:   8 ACC:  32 MEM:  32 ADDR:  13 	LD
+  DEBUG   machine:run           TICK: 156 PC:   9 ACC:  32 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK: 157 PC:  10 ACC:   6 MEM:   6 ADDR:  32 	LD
+  DEBUG   machine:run           TICK: 159 PC:  11 ACC:   5 MEM:   6 ADDR:  32 	DEC
+  DEBUG   machine:run           TICK: 160 PC:  12 ACC:   5 MEM:   5 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 161 PC:   4 ACC:   5 MEM:   5 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 162 PC:   5 ACC:  13 MEM:  13 ADDR:  31 	LD
+  DEBUG   machine:run           TICK: 164 PC:   6 ACC:  14 MEM:  13 ADDR:  31 	INC
+  DEBUG   machine:run           TICK: 165 PC:   7 ACC:  14 MEM:  14 ADDR:  31 	ST
+  DEBUG   machine:run           TICK: 167 PC:   8 ACC: 110 MEM: 110 ADDR:  14 	LD
+  DEBUG   machine:run           TICK: 168 PC:   9 ACC: 110 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK: 169 PC:  10 ACC:   5 MEM:   5 ADDR:  32 	LD
+  DEBUG   machine:run           TICK: 171 PC:  11 ACC:   4 MEM:   5 ADDR:  32 	DEC
+  DEBUG   machine:run           TICK: 172 PC:  12 ACC:   4 MEM:   4 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 173 PC:   4 ACC:   4 MEM:   4 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 174 PC:   5 ACC:  14 MEM:  14 ADDR:  31 	LD
+  DEBUG   machine:run           TICK: 176 PC:   6 ACC:  15 MEM:  14 ADDR:  31 	INC
+  DEBUG   machine:run           TICK: 177 PC:   7 ACC:  15 MEM:  15 ADDR:  31 	ST
+  DEBUG   machine:run           TICK: 179 PC:   8 ACC:  97 MEM:  97 ADDR:  15 	LD
+  DEBUG   machine:run           TICK: 180 PC:   9 ACC:  97 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK: 181 PC:  10 ACC:   4 MEM:   4 ADDR:  32 	LD
+  DEBUG   machine:run           TICK: 183 PC:  11 ACC:   3 MEM:   4 ADDR:  32 	DEC
+  DEBUG   machine:run           TICK: 184 PC:  12 ACC:   3 MEM:   3 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 185 PC:   4 ACC:   3 MEM:   3 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 186 PC:   5 ACC:  15 MEM:  15 ADDR:  31 	LD
+  DEBUG   machine:run           TICK: 188 PC:   6 ACC:  16 MEM:  15 ADDR:  31 	INC
+  DEBUG   machine:run           TICK: 189 PC:   7 ACC:  16 MEM:  16 ADDR:  31 	ST
+  DEBUG   machine:run           TICK: 191 PC:   8 ACC: 109 MEM: 109 ADDR:  16 	LD
+  DEBUG   machine:run           TICK: 192 PC:   9 ACC: 109 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK: 193 PC:  10 ACC:   3 MEM:   3 ADDR:  32 	LD
+  DEBUG   machine:run           TICK: 195 PC:  11 ACC:   2 MEM:   3 ADDR:  32 	DEC
+  DEBUG   machine:run           TICK: 196 PC:  12 ACC:   2 MEM:   2 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 197 PC:   4 ACC:   2 MEM:   2 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 198 PC:   5 ACC:  16 MEM:  16 ADDR:  31 	LD
+  DEBUG   machine:run           TICK: 200 PC:   6 ACC:  17 MEM:  16 ADDR:  31 	INC
+  DEBUG   machine:run           TICK: 201 PC:   7 ACC:  17 MEM:  17 ADDR:  31 	ST
+  DEBUG   machine:run           TICK: 203 PC:   8 ACC: 101 MEM: 101 ADDR:  17 	LD
+  DEBUG   machine:run           TICK: 204 PC:   9 ACC: 101 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK: 205 PC:  10 ACC:   2 MEM:   2 ADDR:  32 	LD
+  DEBUG   machine:run           TICK: 207 PC:  11 ACC:   1 MEM:   2 ADDR:  32 	DEC
+  DEBUG   machine:run           TICK: 208 PC:  12 ACC:   1 MEM:   1 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 209 PC:   4 ACC:   1 MEM:   1 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 210 PC:   5 ACC:  17 MEM:  17 ADDR:  31 	LD
+  DEBUG   machine:run           TICK: 212 PC:   6 ACC:  18 MEM:  17 ADDR:  31 	INC
+  DEBUG   machine:run           TICK: 213 PC:   7 ACC:  18 MEM:  18 ADDR:  31 	ST
+  DEBUG   machine:run           TICK: 215 PC:   8 ACC:  63 MEM:  63 ADDR:  18 	LD
+  DEBUG   machine:run           TICK: 216 PC:   9 ACC:  63 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK: 217 PC:  10 ACC:   1 MEM:   1 ADDR:  32 	LD
+  DEBUG   machine:run           TICK: 219 PC:  11 ACC:   0 MEM:   1 ADDR:  32 	DEC
+  DEBUG   machine:run           TICK: 220 PC:  12 ACC:   0 MEM:   0 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 221 PC:  13 ACC:   0 MEM:   0 ADDR:  32 	JNZ
+  DEBUG   machine:run           TICK: 222 PC:  14 ACC:  10 MEM:  10 ADDR:  29 	LD
+  DEBUG   machine:run           TICK: 223 PC:  15 ACC:  10 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK: 224 PC:  16 ACC:   0 MEM: N/A ADDR: 4242 	CLR
+  DEBUG   machine:run           TICK: 225 PC:  17 ACC:   0 MEM:   0 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 226 PC:  18 ACC:  34 MEM:  34 ADDR:  54 	LD
+  DEBUG   machine:run           TICK: 228 PC:  19 ACC:  35 MEM:  34 ADDR:  54 	INC
+  DEBUG   machine:run           TICK: 229 PC:  20 ACC:  35 MEM:  35 ADDR:  31 	ST
+  DEBUG   machine:run           TICK: 230 PC:  21 ACC:  65 MEM: N/A ADDR: 4343 	LD
+  DEBUG   machine:run           TICK: 231 PC:  22 ACC:  65 MEM:  65 ADDR:  33 	ST
+  DEBUG   machine:run           TICK: 232 PC:  23 ACC:  55 MEM:  10 ADDR:  29 	SUB
+  DEBUG   machine:run           TICK: 233 PC:  24 ACC:  55 MEM:  10 ADDR:  29 	JZ
+  DEBUG   machine:run           TICK: 234 PC:  25 ACC:  65 MEM:  65 ADDR:  33 	LD
+  DEBUG   machine:run           TICK: 236 PC:  26 ACC:  65 MEM:  65 ADDR:  35 	ST
+  DEBUG   machine:run           TICK: 237 PC:  27 ACC:  35 MEM:  35 ADDR:  31 	LD
+  DEBUG   machine:run           TICK: 239 PC:  28 ACC:  36 MEM:  35 ADDR:  31 	INC
+  DEBUG   machine:run           TICK: 240 PC:  29 ACC:  36 MEM:  36 ADDR:  31 	ST
+  DEBUG   machine:run           TICK: 241 PC:  30 ACC:   0 MEM:   0 ADDR:  32 	LD
+  DEBUG   machine:run           TICK: 243 PC:  31 ACC:   1 MEM:   0 ADDR:  32 	INC
+  DEBUG   machine:run           TICK: 244 PC:  32 ACC:   1 MEM:   1 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 244 PC:  20 ACC:   1 MEM:   1 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 245 PC:  21 ACC: 110 MEM: N/A ADDR: 4343 	LD
+  DEBUG   machine:run           TICK: 246 PC:  22 ACC: 110 MEM: 110 ADDR:  33 	ST
+  DEBUG   machine:run           TICK: 247 PC:  23 ACC: 100 MEM:  10 ADDR:  29 	SUB
+  DEBUG   machine:run           TICK: 248 PC:  24 ACC: 100 MEM:  10 ADDR:  29 	JZ
+  DEBUG   machine:run           TICK: 249 PC:  25 ACC: 110 MEM: 110 ADDR:  33 	LD
+  DEBUG   machine:run           TICK: 251 PC:  26 ACC: 110 MEM: 110 ADDR:  36 	ST
+  DEBUG   machine:run           TICK: 252 PC:  27 ACC:  36 MEM:  36 ADDR:  31 	LD
+  DEBUG   machine:run           TICK: 254 PC:  28 ACC:  37 MEM:  36 ADDR:  31 	INC
+  DEBUG   machine:run           TICK: 255 PC:  29 ACC:  37 MEM:  37 ADDR:  31 	ST
+  DEBUG   machine:run           TICK: 256 PC:  30 ACC:   1 MEM:   1 ADDR:  32 	LD
+  DEBUG   machine:run           TICK: 258 PC:  31 ACC:   2 MEM:   1 ADDR:  32 	INC
+  DEBUG   machine:run           TICK: 259 PC:  32 ACC:   2 MEM:   2 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 259 PC:  20 ACC:   2 MEM:   2 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 260 PC:  21 ACC: 100 MEM: N/A ADDR: 4343 	LD
+  DEBUG   machine:run           TICK: 261 PC:  22 ACC: 100 MEM: 100 ADDR:  33 	ST
+  DEBUG   machine:run           TICK: 262 PC:  23 ACC:  90 MEM:  10 ADDR:  29 	SUB
+  DEBUG   machine:run           TICK: 263 PC:  24 ACC:  90 MEM:  10 ADDR:  29 	JZ
+  DEBUG   machine:run           TICK: 264 PC:  25 ACC: 100 MEM: 100 ADDR:  33 	LD
+  DEBUG   machine:run           TICK: 266 PC:  26 ACC: 100 MEM: 100 ADDR:  37 	ST
+  DEBUG   machine:run           TICK: 267 PC:  27 ACC:  37 MEM:  37 ADDR:  31 	LD
+  DEBUG   machine:run           TICK: 269 PC:  28 ACC:  38 MEM:  37 ADDR:  31 	INC
+  DEBUG   machine:run           TICK: 270 PC:  29 ACC:  38 MEM:  38 ADDR:  31 	ST
+  DEBUG   machine:run           TICK: 271 PC:  30 ACC:   2 MEM:   2 ADDR:  32 	LD
+  DEBUG   machine:run           TICK: 273 PC:  31 ACC:   3 MEM:   2 ADDR:  32 	INC
+  DEBUG   machine:run           TICK: 274 PC:  32 ACC:   3 MEM:   3 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 274 PC:  20 ACC:   3 MEM:   3 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 275 PC:  21 ACC: 114 MEM: N/A ADDR: 4343 	LD
+  DEBUG   machine:run           TICK: 276 PC:  22 ACC: 114 MEM: 114 ADDR:  33 	ST
+  DEBUG   machine:run           TICK: 277 PC:  23 ACC: 104 MEM:  10 ADDR:  29 	SUB
+  DEBUG   machine:run           TICK: 278 PC:  24 ACC: 104 MEM:  10 ADDR:  29 	JZ
+  DEBUG   machine:run           TICK: 279 PC:  25 ACC: 114 MEM: 114 ADDR:  33 	LD
+  DEBUG   machine:run           TICK: 281 PC:  26 ACC: 114 MEM: 114 ADDR:  38 	ST
+  DEBUG   machine:run           TICK: 282 PC:  27 ACC:  38 MEM:  38 ADDR:  31 	LD
+  DEBUG   machine:run           TICK: 284 PC:  28 ACC:  39 MEM:  38 ADDR:  31 	INC
+  DEBUG   machine:run           TICK: 285 PC:  29 ACC:  39 MEM:  39 ADDR:  31 	ST
+  DEBUG   machine:run           TICK: 286 PC:  30 ACC:   3 MEM:   3 ADDR:  32 	LD
+  DEBUG   machine:run           TICK: 288 PC:  31 ACC:   4 MEM:   3 ADDR:  32 	INC
+  DEBUG   machine:run           TICK: 289 PC:  32 ACC:   4 MEM:   4 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 289 PC:  20 ACC:   4 MEM:   4 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 290 PC:  21 ACC: 101 MEM: N/A ADDR: 4343 	LD
+  DEBUG   machine:run           TICK: 291 PC:  22 ACC: 101 MEM: 101 ADDR:  33 	ST
+  DEBUG   machine:run           TICK: 292 PC:  23 ACC:  91 MEM:  10 ADDR:  29 	SUB
+  DEBUG   machine:run           TICK: 293 PC:  24 ACC:  91 MEM:  10 ADDR:  29 	JZ
+  DEBUG   machine:run           TICK: 294 PC:  25 ACC: 101 MEM: 101 ADDR:  33 	LD
+  DEBUG   machine:run           TICK: 296 PC:  26 ACC: 101 MEM: 101 ADDR:  39 	ST
+  DEBUG   machine:run           TICK: 297 PC:  27 ACC:  39 MEM:  39 ADDR:  31 	LD
+  DEBUG   machine:run           TICK: 299 PC:  28 ACC:  40 MEM:  39 ADDR:  31 	INC
+  DEBUG   machine:run           TICK: 300 PC:  29 ACC:  40 MEM:  40 ADDR:  31 	ST
+  DEBUG   machine:run           TICK: 301 PC:  30 ACC:   4 MEM:   4 ADDR:  32 	LD
+  DEBUG   machine:run           TICK: 303 PC:  31 ACC:   5 MEM:   4 ADDR:  32 	INC
+  DEBUG   machine:run           TICK: 304 PC:  32 ACC:   5 MEM:   5 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 304 PC:  20 ACC:   5 MEM:   5 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 305 PC:  21 ACC: 121 MEM: N/A ADDR: 4343 	LD
+  DEBUG   machine:run           TICK: 306 PC:  22 ACC: 121 MEM: 121 ADDR:  33 	ST
+  DEBUG   machine:run           TICK: 307 PC:  23 ACC: 111 MEM:  10 ADDR:  29 	SUB
+  DEBUG   machine:run           TICK: 308 PC:  24 ACC: 111 MEM:  10 ADDR:  29 	JZ
+  DEBUG   machine:run           TICK: 309 PC:  25 ACC: 121 MEM: 121 ADDR:  33 	LD
+  DEBUG   machine:run           TICK: 311 PC:  26 ACC: 121 MEM: 121 ADDR:  40 	ST
+  DEBUG   machine:run           TICK: 312 PC:  27 ACC:  40 MEM:  40 ADDR:  31 	LD
+  DEBUG   machine:run           TICK: 314 PC:  28 ACC:  41 MEM:  40 ADDR:  31 	INC
+  DEBUG   machine:run           TICK: 315 PC:  29 ACC:  41 MEM:  41 ADDR:  31 	ST
+  DEBUG   machine:run           TICK: 316 PC:  30 ACC:   5 MEM:   5 ADDR:  32 	LD
+  DEBUG   machine:run           TICK: 318 PC:  31 ACC:   6 MEM:   5 ADDR:  32 	INC
+  DEBUG   machine:run           TICK: 319 PC:  32 ACC:   6 MEM:   6 ADDR:  32 	ST
+  DEBUG   machine:run           TICK: 319 PC:  20 ACC:   6 MEM:   6 ADDR:  32 	ST
+  DEBUG   machine:run           EOF
+out_data: |-
+  [{"position": 0, "value": 18, "src_line": 2},
+  {"position": 1, "value": 87, "src_line": 2},
+  {"position": 2, "value": 104, "src_line": 2},
+  {"position": 3, "value": 97, "src_line": 2},
+  {"position": 4, "value": 116, "src_line": 2},
+  {"position": 5, "value": 32, "src_line": 2},
+  {"position": 6, "value": 105, "src_line": 2},
+  {"position": 7, "value": 115, "src_line": 2},
+  {"position": 8, "value": 32, "src_line": 2},
+  {"position": 9, "value": 121, "src_line": 2},
+  {"position": 10, "value": 111, "src_line": 2},
+  {"position": 11, "value": 117, "src_line": 2},
+  {"position": 12, "value": 114, "src_line": 2},
+  {"position": 13, "value": 32, "src_line": 2},
+  {"position": 14, "value": 110, "src_line": 2},
+  {"position": 15, "value": 97, "src_line": 2},
+  {"position": 16, "value": 109, "src_line": 2},
+  {"position": 17, "value": 101, "src_line": 2},
+  {"position": 18, "value": 63, "src_line": 2},
+  {"position": 19, "value": 0, "src_line": 3},
+  {"position": 20, "value": 7, "src_line": 4},
+  {"position": 21, "value": 72, "src_line": 4},
+  {"position": 22, "value": 101, "src_line": 4},
+  {"position": 23, "value": 108, "src_line": 4},
+  {"position": 24, "value": 108, "src_line": 4},
+  {"position": 25, "value": 111, "src_line": 4},
+  {"position": 26, "value": 44, "src_line": 4},
+  {"position": 27, "value": 32, "src_line": 4},
+  {"position": 28, "value": 20, "src_line": 5},
+  {"position": 29, "value": 10, "src_line": 6},
+  {"position": 30, "value": 33, "src_line": 7},
+  {"position": 31, "value": 0, "src_line": 8},
+  {"position": 32, "value": 0, "src_line": 9},
+  {"position": 33, "value": 0, "src_line": 10},
+  {"position": 34, "value": 0, "src_line": 11},
+  {"position": 35, "value": 0, "src_line": 11},
+  {"position": 36, "value": 0, "src_line": 11},
+  {"position": 37, "value": 0, "src_line": 11},
+  {"position": 38, "value": 0, "src_line": 11},
+  {"position": 39, "value": 0, "src_line": 11},
+  {"position": 40, "value": 0, "src_line": 11},
+  {"position": 41, "value": 0, "src_line": 11},
+  {"position": 42, "value": 0, "src_line": 11},
+  {"position": 43, "value": 0, "src_line": 11},
+  {"position": 44, "value": 0, "src_line": 11},
+  {"position": 45, "value": 0, "src_line": 11},
+  {"position": 46, "value": 0, "src_line": 11},
+  {"position": 47, "value": 0, "src_line": 11},
+  {"position": 48, "value": 0, "src_line": 11},
+  {"position": 49, "value": 0, "src_line": 11},
+  {"position": 50, "value": 0, "src_line": 11},
+  {"position": 51, "value": 0, "src_line": 11},
+  {"position": 52, "value": 0, "src_line": 11},
+  {"position": 53, "value": 0, "src_line": 11},
+  {"position": 54, "value": 34, "src_line": 12}]

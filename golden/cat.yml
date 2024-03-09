@@ -1,37 +1,52 @@
 in_source: |-
-
+  _start:
+        LD  4343
+        ST  4242
+        JMP _start
 in_stdin: |-
-  foo
+  hello world
 out_code: |-
-  [{"index": 0, "opcode": "input", "term": [6, 0, "input"]},
-   {"index": 1, "opcode": "jz", "arg": 5, "term": [8, 0, "jz break"]},
-   {"index": 2, "opcode": "print", "term": [9, 0, "print"]},
-   {"index": 3, "opcode": "input", "term": [10, 0, "input"]},
-   {"index": 4, "opcode": "jmp", "arg": 1, "term": [11, 0, "jmp loop"]},
-   {"index": 5, "opcode": "halt", "term": [13, 0, "halt"]}]
+  [{"position": 0, "opcode": "LD", "operand": 4343, "op_type": "DIRECT", "src_line": 2},
+  {"position": 1, "opcode": "ST", "operand": 4242, "op_type": "DIRECT", "src_line": 3},
+  {"position": 2, "opcode": "JMP", "operand": 0, "op_type": "DIRECT", "src_line": 4}]
 out_stdout: |
-  source LoC: 13 code instr: 6
+  source LoC: 4, code instrs: 3, data: 0
   ============================================================
-  foo
-  instr_counter:  11 ticks: 21
+  hello world
+  Instructions executed: 33
 out_log: |
-  DEBUG   machine:simulation    TICK:   0 PC:   0 ADDR:   0 MEM_OUT: 0 ACC: 0 	input  ('input'@6:0)
-  DEBUG   machine:signal_wr     input: 'f'
-  DEBUG   machine:simulation    TICK:   2 PC:   1 ADDR:   0 MEM_OUT: 102 ACC: 0 	jz 5  ('jz break'@8:0)
-  DEBUG   machine:simulation    TICK:   4 PC:   2 ADDR:   0 MEM_OUT: 102 ACC: 102 	print  ('print'@9:0)
-  DEBUG   machine:signal_output output: '' << 'f'
-  DEBUG   machine:simulation    TICK:   6 PC:   3 ADDR:   0 MEM_OUT: 102 ACC: 102 	input  ('input'@10:0)
-  DEBUG   machine:signal_wr     input: 'o'
-  DEBUG   machine:simulation    TICK:   8 PC:   4 ADDR:   0 MEM_OUT: 111 ACC: 102 	jmp 1  ('jmp loop'@11:0)
-  DEBUG   machine:simulation    TICK:   9 PC:   1 ADDR:   0 MEM_OUT: 111 ACC: 102 	jz 5  ('jz break'@8:0)
-  DEBUG   machine:simulation    TICK:  11 PC:   2 ADDR:   0 MEM_OUT: 111 ACC: 111 	print  ('print'@9:0)
-  DEBUG   machine:signal_output output: 'f' << 'o'
-  DEBUG   machine:simulation    TICK:  13 PC:   3 ADDR:   0 MEM_OUT: 111 ACC: 111 	input  ('input'@10:0)
-  DEBUG   machine:signal_wr     input: 'o'
-  DEBUG   machine:simulation    TICK:  15 PC:   4 ADDR:   0 MEM_OUT: 111 ACC: 111 	jmp 1  ('jmp loop'@11:0)
-  DEBUG   machine:simulation    TICK:  16 PC:   1 ADDR:   0 MEM_OUT: 111 ACC: 111 	jz 5  ('jz break'@8:0)
-  DEBUG   machine:simulation    TICK:  18 PC:   2 ADDR:   0 MEM_OUT: 111 ACC: 111 	print  ('print'@9:0)
-  DEBUG   machine:signal_output output: 'fo' << 'o'
-  DEBUG   machine:simulation    TICK:  20 PC:   3 ADDR:   0 MEM_OUT: 111 ACC: 111 	input  ('input'@10:0)
-  WARNING machine:simulation    Input buffer is empty!
-  INFO    machine:simulation    output_buffer: 'foo'
+  DEBUG   machine:run           TICK:   1 PC:   1 ACC: 104 MEM: N/A ADDR: 4343 	LD
+  DEBUG   machine:run           TICK:   2 PC:   2 ACC: 104 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK:   2 PC:   0 ACC: 104 MEM: N/A ADDR: 4242 	JMP
+  DEBUG   machine:run           TICK:   3 PC:   1 ACC: 101 MEM: N/A ADDR: 4343 	LD
+  DEBUG   machine:run           TICK:   4 PC:   2 ACC: 101 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK:   4 PC:   0 ACC: 101 MEM: N/A ADDR: 4242 	JMP
+  DEBUG   machine:run           TICK:   5 PC:   1 ACC: 108 MEM: N/A ADDR: 4343 	LD
+  DEBUG   machine:run           TICK:   6 PC:   2 ACC: 108 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK:   6 PC:   0 ACC: 108 MEM: N/A ADDR: 4242 	JMP
+  DEBUG   machine:run           TICK:   7 PC:   1 ACC: 108 MEM: N/A ADDR: 4343 	LD
+  DEBUG   machine:run           TICK:   8 PC:   2 ACC: 108 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK:   8 PC:   0 ACC: 108 MEM: N/A ADDR: 4242 	JMP
+  DEBUG   machine:run           TICK:   9 PC:   1 ACC: 111 MEM: N/A ADDR: 4343 	LD
+  DEBUG   machine:run           TICK:  10 PC:   2 ACC: 111 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK:  10 PC:   0 ACC: 111 MEM: N/A ADDR: 4242 	JMP
+  DEBUG   machine:run           TICK:  11 PC:   1 ACC:  32 MEM: N/A ADDR: 4343 	LD
+  DEBUG   machine:run           TICK:  12 PC:   2 ACC:  32 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK:  12 PC:   0 ACC:  32 MEM: N/A ADDR: 4242 	JMP
+  DEBUG   machine:run           TICK:  13 PC:   1 ACC: 119 MEM: N/A ADDR: 4343 	LD
+  DEBUG   machine:run           TICK:  14 PC:   2 ACC: 119 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK:  14 PC:   0 ACC: 119 MEM: N/A ADDR: 4242 	JMP
+  DEBUG   machine:run           TICK:  15 PC:   1 ACC: 111 MEM: N/A ADDR: 4343 	LD
+  DEBUG   machine:run           TICK:  16 PC:   2 ACC: 111 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK:  16 PC:   0 ACC: 111 MEM: N/A ADDR: 4242 	JMP
+  DEBUG   machine:run           TICK:  17 PC:   1 ACC: 114 MEM: N/A ADDR: 4343 	LD
+  DEBUG   machine:run           TICK:  18 PC:   2 ACC: 114 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK:  18 PC:   0 ACC: 114 MEM: N/A ADDR: 4242 	JMP
+  DEBUG   machine:run           TICK:  19 PC:   1 ACC: 108 MEM: N/A ADDR: 4343 	LD
+  DEBUG   machine:run           TICK:  20 PC:   2 ACC: 108 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK:  20 PC:   0 ACC: 108 MEM: N/A ADDR: 4242 	JMP
+  DEBUG   machine:run           TICK:  21 PC:   1 ACC: 100 MEM: N/A ADDR: 4343 	LD
+  DEBUG   machine:run           TICK:  22 PC:   2 ACC: 100 MEM: N/A ADDR: 4242 	ST
+  DEBUG   machine:run           TICK:  22 PC:   0 ACC: 100 MEM: N/A ADDR: 4242 	JMP
+  DEBUG   machine:run           EOF
+out_data: '[]'
