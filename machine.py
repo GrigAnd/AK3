@@ -3,6 +3,7 @@ import logging
 
 from isa import Opcode, OperandType, read_code, read_data
 
+
 class ALU(str, Enum):
     ADD = "ADD"
     SUB = "SUB"
@@ -14,7 +15,7 @@ class ALU(str, Enum):
 
     def __str__(self) -> str:
         return self.value
-    
+
     def get_lambda(self):
         match self:
             case ALU.ADD:
@@ -31,7 +32,7 @@ class ALU(str, Enum):
                 return lambda dp: dp.acc - 1
             case ALU.CLR:
                 return lambda dp: 0
-            
+
 
 class DataPath:
     data_memory = None
@@ -76,7 +77,7 @@ class DataPath:
 
     def is_z(self) -> bool:
         return self.acc == 0
-    
+
     def is_n(self) -> bool:
         return self.acc < 0
 
@@ -156,7 +157,7 @@ class ControlUnit:
         match opcode:
             case Opcode.HLT:
                 raise StopIteration
-            
+
             case Opcode.JMP:
                 self.latch_pc(True)
 
@@ -261,18 +262,15 @@ class ControlUnit:
             self.data_path.acc if self.data_path.acc is not None else "N/A",
             (
                 self.data_path.data_memory[self.data_path.data_address]
-                if self.data_path.data_address < len(self.data_path.data_memory) and self.data_path.data_memory[self.data_path.data_address] is not None
+                if self.data_path.data_address < len(self.data_path.data_memory)
+                and self.data_path.data_memory[self.data_path.data_address] is not None
                 else "N/A"
             ),
-            (
-                self.data_path.data_address
-                if self.data_path.data_address is not None
-                else "N/A"
-            ),
+            (self.data_path.data_address if self.data_path.data_address is not None else "N/A"),
         )
         # TODO
 
-        instr = self.program_memory[self.pc-1]
+        instr = self.program_memory[self.pc - 1]
         opcode = instr["opcode"]
         instr_repr = str(opcode)
 
@@ -295,7 +293,6 @@ def run(
     out_addr: int,
     limit: int,
 ) -> tuple:
-
     dp = DataPath(data, data_memory_size, input_buffer, in_addr, out_addr)
     cu = ControlUnit(code, dp)
     instr_count = 0
