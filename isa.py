@@ -1,7 +1,8 @@
-from collections import namedtuple
+from __future__ import annotations
+
 import json
+from collections import namedtuple
 from enum import Enum
-from typing import List
 
 
 class Opcode(str, Enum):
@@ -42,35 +43,32 @@ class Data(namedtuple("Data", ["position", "value"])):
         return f"{self.position} {self.value}"
 
 
-def write_code(code: List[Expression], filename: str) -> None:
+def write_code(code: list, filename: str) -> None:
     with open(filename, "w", encoding="utf-8") as file:
         buf = [json.dumps(instr) for instr in code]
         file.write("[" + ",\n".join(buf) + "]")
 
 
-def write_data(data: List[Data], filename: str) -> None:
+def write_data(data: list, filename: str) -> None:
     with open(filename, "w", encoding="utf-8") as file:
         buf = [json.dumps(datum) for datum in data]
         file.write("[" + ",\n".join(buf) + "]")
 
 
 def read_code(filename: str) -> list:
-    with open(filename, "r", encoding="utf-8") as file:
+    with open(filename, encoding="utf-8") as file:
         code = json.load(file)
 
     instrs = []
 
     for instr in code:
-        # opcode = Opcode(instr["opcode"])
-        # operand = instr["operand"]
-        # op_type = OperandType(instr["op_type"])
         instrs.append(instr)
 
     return instrs
 
 
-def read_data(filename: str) -> List[Data]:
-    with open(filename, "r", encoding="utf-8") as file:
+def read_data(filename: str) -> list:
+    with open(filename, encoding="utf-8") as file:
         data = json.load(file)
 
     data_list = []

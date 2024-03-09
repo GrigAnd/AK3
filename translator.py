@@ -1,6 +1,6 @@
-import sys
 import shlex
-from typing import List, Tuple
+import sys
+
 from isa import Opcode, OperandType, write_code, write_data
 
 
@@ -14,6 +14,18 @@ def value_to_number(value: str) -> int:
         return int(value, 16)
     return int(value)
 
+def prepare_lines(lines: list) -> list:
+    prepared = []
+    for line in lines:
+        line = clear_line(line)
+        if not line:  # empty line
+            continue
+        prepared.append(line)
+    return prepared
+
+
+
+
 
 def translate(src: str):
     lines = src.splitlines()
@@ -23,11 +35,10 @@ def translate(src: str):
     position = 0
     src_line = 0
 
+    lines = prepare_lines(lines)
+
     for line in lines:
         src_line += 1
-        line = clear_line(line)
-        if not line:  # empty line
-            continue
 
         splitted = shlex.split(line, posix=False)  # split but ignore quotes
 
@@ -52,45 +63,71 @@ def translate(src: str):
             labels[label] = position
 
             if value.startswith('"'):  # string
-                value = value[1:-1]
-                data.append({"position": position, "value": len(value), "src_line": src_line})
-                position += 1
-                for char in value:  # string as array of chars
-                    data.append({"position": position, "value": ord(char), "src_line": src_line})
-                    position += 1
+                position = add_string
                 continue
 
-            if value[0].isdigit():
-                value = value_to_number(value)
-            else:
-                value = labels[value]
+            value = parse_data_arg(value, labels)
 
-            if len(splitted) > 3 and splitted[3] == "dup":  # buffer
-                count = value
-                for _ in range(count):
-                    data.append({"position": position, "value": 0, "src_line": src_line})
-                    position += 1
-            else:
-                data.append({"position": position, "value": value, "src_line": src_line})  # single value
-                position += 1
+            position = parse_buffer(splitted, position, data, src_line, value)
 
             continue
 
-        opcode, *operand = line.split()  # instruction
-        opcode = Opcode(opcode)
-        if operand:
-            operand = operand[0]  # only one operand
-        else:
-            operand = None
-
-        if operand and operand[0].isdigit():
-            operand = value_to_number(operand)
+        opcode, operand = parse_instruction(line)
 
         instrs.append(
             {"position": position, "opcode": opcode, "operand": operand, "op_type": None, "src_line": src_line}
         )
         position += 1
 
+
+    parse_indirect_operands(instrs)
+    set_labels(instrs, labels)
+
+    return instrs, data
+
+def parse_buffer(splitted: list, position: int, data: list, src_line: int, value: int) -> int:
+    if len(splitted) > 3 and splitted[3] == "dup":  # buffer
+        count = value
+        for _ in range(count):
+            add_data(data, position, 0, src_line)
+            position += 1
+    else:
+        add_data(data, position, value, src_line)  # single value
+        position += 1
+
+    return position
+
+def parse_data_arg(value: str, labels: dict) -> int:
+    if value[0].isdigit():  # number
+        return value_to_number(value)
+
+    return labels[value]
+
+def parse_instruction(line: str) -> tuple:
+    opcode, *operand = line.split()
+    opcode = Opcode(opcode)
+    if operand:
+        operand = operand[0]
+    else:
+        operand = None
+
+    if operand and operand[0].isdigit():
+        operand = value_to_number(operand)
+
+    return opcode, operand
+
+def add_string(data: list, position: int, value: str, src_line: int) -> None:
+    value = value[1:-1]
+    add_data(data, position, len(value), src_line)
+    position += 1
+    for char in value:  # string as array of chars
+        add_data(data, position, ord(char),src_line)
+        position += 1
+
+def add_data(data: list, position: int, value: int, src_line: int) -> None:
+    data.append({"position": position, "value": value, "src_line": src_line})
+
+def parse_indirect_operands(instrs: list) -> None:
     for instr in instrs:  # indirect addressing
         if str(instr["operand"]).startswith("["):
             instr["op_type"] = OperandType.INDIRECT
@@ -100,6 +137,8 @@ def translate(src: str):
         else:
             instr["op_type"] = OperandType.NONE
 
+
+def set_labels(instrs: list, labels: dict) -> None:
     for instr in instrs:  # replace labels with addresses
         if instr["operand"] in labels:
             label = instr["operand"]
@@ -107,13 +146,11 @@ def translate(src: str):
 
     for instr in instrs:  # check for unknown labels
         if isinstance(instr["operand"], str):
-            raise ValueError(f"Unknown label in {instr}")
-
-    return instrs, data
+            raise TypeError
 
 
 def main(input_file: str, data_file: str, code_file: str) -> None:
-    with open(input_file, "r", encoding="utf-8") as file:
+    with open(input_file, encoding="utf-8") as file:
         src = file.read()
 
     code, data = translate(src)
@@ -124,10 +161,6 @@ def main(input_file: str, data_file: str, code_file: str) -> None:
 
 
 if __name__ == "__main__":
-    # assert len(sys.argv) == 4, "Wrong args: translator.py <asm_input_file> <output_data_file> <output_code_file>"
-    # _, input_file, data_file, code_file = sys.argv
-
-    input_file = "./asm_src/code.asm"
-    data_file = "./translated/data.json"
-    code_file = "./translated/code.json"
+    assert len(sys.argv) == 4, "Wrong args: translator.py <asm_input_file> <output_data_file> <output_code_file>"
+    _, input_file, data_file, code_file = sys.argv
     main(input_file, data_file, code_file)

@@ -1,5 +1,6 @@
-from enum import Enum
 import logging
+import sys
+from enum import Enum
 
 from isa import Opcode, OperandType, read_code, read_data
 
@@ -162,26 +163,13 @@ class ControlUnit:
                 self.latch_pc(True)
 
             case Opcode.JZ:
-                self.tick()
-                if self.data_path.is_z():
-                    self.latch_pc(True)
-                else:
-                    self.latch_pc(False)
-                self.tick()
+                self.branch_command(self.data_path.is_z())
 
             case Opcode.JNZ:
-                self.tick()
-                if not self.data_path.is_z():
-                    self.latch_pc(True)
-                else:
-                    self.latch_pc(False)
+                self.branch_command(not self.data_path.is_z())
 
             case Opcode.JN:
-                self.tick()
-                if self.data_path.is_n():
-                    self.latch_pc(True)
-                else:
-                    self.latch_pc(False)
+                self.branch_command(self.data_path.is_n())
 
             case Opcode.CLR:
                 self.data_path.alu_mode = ALU.CLR
@@ -204,17 +192,14 @@ class ControlUnit:
                 self.latch_pc(False)
 
             case Opcode.ST:
-                if instr["op_type"] == OperandType.DIRECT:
-                    self.data_path.data_address = instr["operand"]
-                    self.data_path.wr()
-                    self.tick()
-                elif instr["op_type"] == OperandType.INDIRECT:
-                    self.data_path.data_address = instr["operand"]
+                self.data_path.data_address = instr["operand"]
+                if instr["op_type"] == OperandType.INDIRECT:
                     self.data_path.eo()
                     self.tick()
                     self.data_path.data_address = self.data_path.alu_right
-                    self.data_path.wr()
-                    self.tick()
+
+                self.data_path.wr()
+                self.tick()
                 self.latch_pc(False)
 
             case Opcode.INC:
@@ -232,31 +217,30 @@ class ControlUnit:
                 self.latch_pc(False)
 
             case Opcode.SUB:
-                self.data_path.data_address = instr["operand"]
-                self.data_path.eo()
-                self.tick()
-                self.data_path.alu_mode = ALU.SUB
-                self.data_path.latch_acc()
-                self.latch_pc(False)
-
+                self.alu_command(instr, ALU.SUB)
             case Opcode.ADD:
-                self.data_path.data_address = instr["operand"]
-                self.data_path.eo()
-                self.tick()
-                self.data_path.alu_mode = ALU.ADD
-                self.data_path.latch_acc()
-                self.latch_pc(False)
-
+                self.alu_command(instr, ALU.ADD)
             case Opcode.DIVR:
-                self.data_path.data_address = instr["operand"]
-                self.data_path.eo()
-                self.tick()
-                self.data_path.alu_mode = ALU.DIVR
-                self.data_path.latch_acc()
-                self.latch_pc(False)
+                self.alu_command(instr, ALU.DIVR)
+
+    def alu_command(self, instr, alu_mode) -> None:
+        self.data_path.data_address = instr["operand"]
+        self.data_path.eo()
+        self.tick()
+        self.data_path.alu_mode = alu_mode
+        self.data_path.latch_acc()
+        self.latch_pc(False)
+
+    def branch_command(self, condition) -> None:
+        if condition:
+            self.latch_pc(True)
+        else:
+            self.latch_pc(False)
+        self.tick()
+
 
     def __repr__(self) -> str:
-        repr = "TICK: {:3} PC: {:3} ACC: {:3} MEM: {:3} ADDR: {:3}".format(
+        r = "TICK: {:3} PC: {:3} ACC: {:3} MEM: {:3} ADDR: {:3}".format(
             self.get_tick() if self.get_tick() is not None else "N/A",
             self.pc if self.pc is not None else "N/A",
             self.data_path.acc if self.data_path.acc is not None else "N/A",
@@ -268,7 +252,6 @@ class ControlUnit:
             ),
             (self.data_path.data_address if self.data_path.data_address is not None else "N/A"),
         )
-        # TODO
 
         instr = self.program_memory[self.pc - 1]
         opcode = instr["opcode"]
@@ -281,7 +264,7 @@ class ControlUnit:
             term = instr["term"]
             instr_repr += "  ('{}'@{}:{})".format(term.symbol, term.line, term.pos)
 
-        return "{} \t{}".format(repr, instr_repr)
+        return "{} \t{}".format(r, instr_repr)
 
 
 def run(
@@ -314,7 +297,7 @@ def main(input_file: str, data_file: str, code_file: str) -> None:
     code = read_code(code_file)
     data = read_data(data_file)
 
-    with open(input_file, "r", encoding="utf-8") as file:
+    with open(input_file, encoding="utf-8") as file:
         input_text = file.read()
         tokens = []
         for char in input_text:
@@ -336,10 +319,7 @@ def main(input_file: str, data_file: str, code_file: str) -> None:
 
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.DEBUG)
-    # assert len(sys.argv) == 4, "Wrong args: machine.py <code_file> <data_file> <input_file>"
-    # _, code_file, data_file, input_file = sys.argv
-    code_file = "./translated/code.json"
-    data_file = "./translated/data.json"
-    input_file = "./input.txt"
+    assert len(sys.argv) == 4, "Wrong args: machine.py <code_file> <data_file> <input_file>"
+    _, code_file, data_file, input_file = sys.argv
 
     main(input_file, data_file, code_file)
