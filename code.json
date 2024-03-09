@@ -15,7 +15,7 @@
 {"position": 14, "opcode": "ST", "operand": 4242, "op_type": "DIRECT", "src_line": 33},
 {"position": 15, "opcode": "CLR", "operand": null, "op_type": "NONE", "src_line": 35},
 {"position": 16, "opcode": "ST", "operand": 32, "op_type": "DIRECT", "src_line": 36},
-{"position": 17, "opcode": "LD", "operand": 34, "op_type": "DIRECT", "src_line": 37},
+{"position": 17, "opcode": "LD", "operand": 54, "op_type": "DIRECT", "src_line": 37},
 {"position": 18, "opcode": "INC", "operand": null, "op_type": "NONE", "src_line": 38},
 {"position": 19, "opcode": "ST", "operand": 31, "op_type": "DIRECT", "src_line": 39},
 {"position": 20, "opcode": "LD", "operand": 4343, "op_type": "DIRECT", "src_line": 42},

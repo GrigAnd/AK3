@@ -85,7 +85,6 @@ class DataPath:
     def get_io(self) -> int:
         try:
             char = self.input_buffer.pop(0)
-            print(f"CHAR: {char}")
             return ord(char)
         except IndexError:
             raise EOFError
@@ -194,10 +193,24 @@ class ControlUnit:
                 self.latch_pc(False)
 
             case Opcode.ST:
-                self.data_path.data_address = instr["operand"]
-                self.data_path.da_mux("acc")
-                self.data_path.wr()
-                self.tick()
+                if instr["op_type"] == OperandType.DIRECT:
+                    self.data_path.data_address = instr["operand"]
+                    self.data_path.da_mux("acc")
+                    self.data_path.wr()
+                    self.tick()
+                elif instr["op_type"] == OperandType.INDIRECT:
+                    self.data_path.data_address = instr["operand"]
+                    self.data_path.eo()
+                    self.tick()
+
+                    self.data_path.data_address = self.data_path.alu_1
+                    self.data_path.da_mux("acc")
+                    self.data_path.wr()
+                    self.tick()
+
+
+
+                    
 
                 #     self.data_path.data_address = self.data_path.alu_1
                 #     self.data_path.wr()

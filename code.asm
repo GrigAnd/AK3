@@ -29,12 +29,12 @@ _loop_prompt:
         ST  len                 ; len--
         JNZ _loop_prompt        ; if len != 0, goto _loop_prompt
 
-        LD  n_char
-        ST  4242
+        LD  n_char              ; \n
+        ST  4242                ; output buffer
 
         CLR
         ST len                  ; len = 0
-        LD name
+        LD name_ptr
         INC
         ST ptr                  ; ptr = &name[1]
 
