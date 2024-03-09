@@ -19,8 +19,6 @@ class DataPath:
     input = None
     output = None
 
-    da_mux_state = None
-
     alu_1: int = 0
     alu_out: int = 0
 
@@ -56,9 +54,6 @@ class DataPath:
     def clr_acc(self) -> None:
         self.acc = 0
 
-    def da_mux(self, state: str) -> None:
-        self.da_mux_state = state
-
     def eo(self) -> None:
         eo_in, _ = self.decode_address()
 
@@ -68,12 +63,7 @@ class DataPath:
             self.alu_1 = self.data_memory[self.data_address]
 
     def wr(self) -> None:
-        data = None
-
-        if self.da_mux_state == "input":
-            data = self.input
-        elif self.da_mux_state == "acc":
-            data = self.acc
+        data = self.acc
 
         _, wr_out = self.decode_address()
 
@@ -195,7 +185,6 @@ class ControlUnit:
             case Opcode.ST:
                 if instr["op_type"] == OperandType.DIRECT:
                     self.data_path.data_address = instr["operand"]
-                    self.data_path.da_mux("acc")
                     self.data_path.wr()
                     self.tick()
                 elif instr["op_type"] == OperandType.INDIRECT:
@@ -204,7 +193,6 @@ class ControlUnit:
                     self.tick()
 
                     self.data_path.data_address = self.data_path.alu_1
-                    self.data_path.da_mux("acc")
                     self.data_path.wr()
                     self.tick()
 
